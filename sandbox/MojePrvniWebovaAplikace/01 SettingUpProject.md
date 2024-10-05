@@ -1,20 +1,20 @@
 # Setting Up Final Project
 
 cd ToDoList
-dotnet new sln --name ToDoList
+dotnet new sln --name MojePrvniWebovaAplikace
 
 ## 📡 Creating ToDoList.WebApi project
 
 ```cmd
 cd ToDoList
-dotnet new web --name ToDoList.WebApi --output src/ToDoList.WebApi
+dotnet new web --name MojePrvniWebovaAplikace.WebApi --output src/MojePrvniWebovaAplikace.WebApi
 ```
 
 ## 📘 Creating ToDoList.Model project
 
 ```cmd
 cd ToDoList
-dotnet new classlib --name ToDoList.Model --output src/ToDoList.Model
+dotnet new classlib --name MojePrvniWebovaAplikace.Model --output src/MojePrvniWebovaAplikace.Model
 ```
 
 ## 🗃️ Creating ToDoList.Persistency project

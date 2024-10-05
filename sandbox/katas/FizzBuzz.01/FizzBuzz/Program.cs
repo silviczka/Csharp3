@@ -8,7 +8,6 @@ namespace UkolFizzBuzz
     {
         static void Main(string[] args)
         {
-            //FizzBuzz fizzbuzz = new FizzBuzz();
             Console.WriteLine("Hello, please enter number greater than 0, which will be the upper limit for FizzBuzz game.");
             int theNumber;
             bool isNum = int.TryParse(Console.ReadLine(), out theNumber);

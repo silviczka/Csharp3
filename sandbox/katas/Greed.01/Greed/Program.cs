@@ -7,9 +7,9 @@ namespace UkolGreed
         {
             Console.WriteLine("Welcome to the Dice game, press any key to roll the dice");
             Console.ReadLine();
+            Random rnd = new Random();
             for (int i = 1; i < 6; i++)
             {
-                Random rnd = new Random();
                 int die = rnd.Next(1, 7);
                 TheDice.DieNumbers.Add(die);
             }
