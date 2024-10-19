@@ -8,21 +8,14 @@ namespace ToDoList.Domain.DTOs;
 public record ToDoItemCreateRequestDto(string Name, string Description, bool isCompleted) //id is generated
 {   //alternativny zapis v 1 riadku
     //public ToDoItem ToDomain() => new() { Name = Name, Description = Description, IsCompleted = IsCompleted };
-public ToDoItem ToDomain()
+    public ToDoItem ToDomain()
     {
-        var newToDoItem= new ToDoItem
+        var newToDoItem = new ToDoItem
         {
             Name = Name,
             Description = Description,
-            isCompleted = isCompleted
+            IsCompleted = isCompleted
         };
         return newToDoItem;
-
-//ToDoItem newToDoItem = new ToDoItem();
-//newToDoItem.Name = this.Name;
-//newToDoItem.Description = this.Description;
-//newToDoItem.isCompleted = this.isCompleted;
-
-
     }
 }
