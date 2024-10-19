@@ -29,14 +29,15 @@ public class ToDoItemsController : ControllerBase
 
         //respond to client
 
-        return Created(); // to jsme si s Honzou napsali v nasem reseni, vraci to status code 201 as oppsoed to NoContent , kt.vraci 204, podle AI je spravnejsi Created - 201, protoze zobrazi clientovi informaci
-         //return NoContent();    //201 //tato metoda z nějakého důvodu vrací status code No Content 204, zjištujeme proč ;) << error
+        return Created(); // to jsme si s Honzou napsali v nasem reseni, vraci to status code 201 as opposed to NoContent , kt.vraci 204,
+                        //podle AI je spravnejsi Created - 201, protoze zobrazi clientovi informaci
+        //return NoContent();    //201 //tato metoda z nějakého důvodu vrací status code No Content 204, zjištujeme proč ;) << error
     }
 
     [HttpGet]
-    public IActionResult Read() //Honzovo reseni implementuje try catch, coz AI schvaluje vice
+    public IActionResult Read() //Honzovo reseni implementuje try catch, coz AI schvaluje
     {
-        try // v try bloku jde o simulaci chyby, aby jsme overili, ze catch blok funguje, v beznem kodu bejsme to nenasli, tam osetrujeme realne zalezitosti
+        try // v try bloku jde o simulaci chyby, aby jsme overili, ze catch blok funguje, v beznem kodu bysme to nenasli, tam osetrujeme realne zalezitosti
             {
                 throw new Exception("Neco se pokazilo");
             }
