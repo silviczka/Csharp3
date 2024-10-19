@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using ToDoList.Domain.Models;
 using ToDoList.WebApi.Controllers;
 
+//class where I will write my tests for the Get methods of the ToDoItemsController
 public class GetTests
 {
-    [Fact]
+    [Fact] // Fact attribute indicaties that this method is a test method
+    //the method "get all items - returns all items" is testing whether the controller correctly returns all ToDoItems
     public void Get_AllItems_ReturnsAllItems()
     {
-        // Arrange
+        // Arrange - here we set up the objects we will use in the test
         var controller = new ToDoItemsController();
         var toDoItem = new ToDoItem
         {
@@ -20,7 +22,7 @@ public class GetTests
         };
         ToDoItemsController.items.Add(toDoItem);
 
-        // Act
+        // Act - here we call method we want to test
         var result = controller.Read();
         var resultResult = result.Result;
         var value = result.GetValue();
