@@ -4,10 +4,11 @@ using ToDoList.Domain.DTOs;
 using ToDoList.Domain.Models;
 
 [ApiController]
-[Route("api/[controller]")] //bude se to jmenovat ToDoItems po vzoru nazvu classu
+[Route("api/[controller]")] //it is called ToDoItems because of name of class
 public class ToDoItemsController : ControllerBase
 {
-    public static readonly List<ToDoItem> items = [];
+    //public static readonly List<ToDoItem> items = [];
+    public static List<ToDoItem> items = [];
 
     [HttpPost]
     //DTO data transfer object
