@@ -8,7 +8,7 @@ namespace ToDoList.Test;
 public class DeleteTests
 {
 
-[Fact]
+    [Fact]
     public void Delete_ItemExists_Returns204()
     {
         // Arrange
