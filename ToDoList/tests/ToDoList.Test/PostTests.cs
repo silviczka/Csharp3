@@ -15,7 +15,7 @@ public class PostTests
         // Arrange
         var controller = new ToDoItemsController();
         ToDoItemsController.items = new List<ToDoItem>(); //makes sure the static list is empty before test
-        var requestDto = new ToDoItemCreateRequestDto("Test Name", "Test Description", false); //we expect the new ToDoItem will no be completed at the time of creation
+        var requestDto = new ToDoItemCreateRequestDto("Test Name", "Test Description", false); //we expect the new ToDoItem will not be completed at the time of creation
 
         // Act
         var result = controller.Create(requestDto);
