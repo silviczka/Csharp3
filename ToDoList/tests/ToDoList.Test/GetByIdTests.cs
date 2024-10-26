@@ -18,7 +18,8 @@ public class GetByIdTests
             Description = "Popis",
             IsCompleted = false
         };
-        controller.items.Add(toDoItem);
+        //temporarily commented out as database set up is not complete
+        //controller.items.Add(toDoItem);
 
         // Act
         var result = controller.ReadById(toDoItem.ToDoItemId);
@@ -47,7 +48,8 @@ public class GetByIdTests
             Description = "Popis",
             IsCompleted = false
         };
-        controller.items.Add(toDoItem);
+        //temporarily commented out as database set up is not complete
+        //controller.items.Add(toDoItem);
 
         // Act
         var invalidId = -1;

@@ -1,8 +1,15 @@
 namespace ToDoList.Test;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ToDoList.Domain.Models;
 using ToDoList.WebApi.Controllers;
+using ToDoList.Persistence;
+using ToDoList.Domain.DTOs;
+using System.Collections.Generic;
+using System.Linq;
+using Xunit;
+
 
 //class where I will write my tests for the Get methods of the ToDoItemsController
 public class GetTests
@@ -20,7 +27,8 @@ public class GetTests
             Description = "Popis",
             IsCompleted = false
         };
-        controller.items.Add(toDoItem);
+        //temporarily commented out as database set up is not complete
+        //controller.items.Add(toDoItem);
 
         // Act - here we call method we want to test
         var result = controller.Read();

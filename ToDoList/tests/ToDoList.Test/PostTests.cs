@@ -14,7 +14,8 @@ public class PostTests
     {
         // Arrange
         var controller = new ToDoItemsController();
-        ToDoItemsController.items = new List<ToDoItem>(); //makes sure the static list is empty before test
+        //temporarily commented out as database set up is not complete
+        //ToDoItemsController.items = new List<ToDoItem>(); //makes sure the static list is empty before test
         var requestDto = new ToDoItemCreateRequestDto("Test Name", "Test Description", false); //we expect the new ToDoItem will not be completed at the time of creation
 
         // Act
@@ -38,7 +39,9 @@ public class PostTests
         // Arrange
         var controller = new ToDoItemsController();
         // Simulating an error by setting the items list to null or an invalid state
-        ToDoItemsController.items = null;
+
+        //temporarily commented out as database set up is not complete
+        //ToDoItemsController.items = null;
 
         var requestDto = new ToDoItemCreateRequestDto("Test Name", "Test Description", false);
 

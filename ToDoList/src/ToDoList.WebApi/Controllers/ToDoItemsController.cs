@@ -1,14 +1,23 @@
 namespace ToDoList.WebApi.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
 using ToDoList.Domain.DTOs;
 using ToDoList.Domain.Models;
+using ToDoList.Persistence;
 
 [ApiController]
-[Route("api/[controller]")] //it is called ToDoItems because of name of class
+[Route("api/[controller]")]
 public class ToDoItemsController : ControllerBase
 {
-    //public static readonly List<ToDoItem> items = [];
-    public static List<ToDoItem> items = [];
+    private readonly ToDoItemsContext context; // class throough which we communicate with database
+    public ToDoItemsController(ToDoItemsContext context)
+    {
+        this.context = context;
+    }
+
+    /* public ToDoItemsController()
+    {
+    } */
 
     [HttpPost]
     //DTO data transfer object
@@ -20,9 +29,15 @@ public class ToDoItemsController : ControllerBase
         //try to create and add the item to the list
         try
         {
-            //generate a new ID for the item
-            item.ToDoItemId = items.Count == 0 ? 1 : items.Max(o => o.ToDoItemId) + 1;
-            items.Add(item);
+            //generate a new ID for the item and add it to the database
+
+            /*OG code:
+/*          item.ToDoItemId = items.Count == 0 ? 1 : items.Max(o => o.ToDoItemId) + 1;
+            items.Add(item); */
+
+            //NEW CODE:  we do not need to set up the rule max +1, the database it doing it itself
+            context.ToDoItems.Add(item);
+            context.SaveChanges();
         }
         catch (Exception ex)
         {
@@ -44,7 +59,7 @@ public class ToDoItemsController : ControllerBase
         // Try to retrieve the list of items
         try
         {
-            itemsToGet = items;
+            itemsToGet = context.ToDoItems.ToList();
         }
         catch (Exception ex)
         {
@@ -53,7 +68,7 @@ public class ToDoItemsController : ControllerBase
 
         //respond to client
         //if the list is null, return 404 not found, else return 200 OK with the List of items mapped to DTOs
-        return (itemsToGet is null)
+        return (itemsToGet is null || !itemsToGet.Any())
             ? NotFound() //404
             : Ok(itemsToGet.Select(ToDoItemGetResponseDto.FromDomain).ToList()); //200
     }
@@ -66,7 +81,7 @@ public class ToDoItemsController : ControllerBase
         try
         {
             //use LINQ's Find() to search for the item by ID
-            itemToGet = items.Find(i => i.ToDoItemId == toDoItemId);
+            itemToGet = context.ToDoItems.Find(toDoItemId);
         }
         catch (Exception ex)
         {
@@ -89,25 +104,25 @@ public class ToDoItemsController : ControllerBase
         //try to update the item by retrieving it with given id
         try
         {
-            //find the index of the item to update using LINQ's FindIndex
-            var itemIndexToUpdate = items.FindIndex(i => i.ToDoItemId == toDoItemId);
+            //find the existing item in the database
+            var itemToUpdate = context.ToDoItems.Find(toDoItemId);
+
             //if the item is not found, return 404 Not Found
-            //FindIndex() works the wway that if it finds the item that matches the condition,
-            //it returns the zero based index of the item in the list
-            //contrarywise if FindIndex() does not find an item matching the condition, it returns -1
-            //an index of -1 is a common convention for indicating "not found", because the list indices typically start at 0
-            if (itemIndexToUpdate == -1)
+            if (itemToUpdate == null)
             {
                 return NotFound(); //404
             }
-            //Update the item;s ID to the given ToDoItemId to ensure the ID stays consistent
-            updatedItem.ToDoItemId = toDoItemId;
-            //Replace the item at the found index with the updated item
-            items[itemIndexToUpdate] = updatedItem;
+            //update the existing item's properties
+            itemToUpdate.Name = updatedItem.Name;
+            itemToUpdate.Description = updatedItem.Description;
+            itemToUpdate.IsCompleted = updatedItem.IsCompleted;
+
+            context.ToDoItems.Update(itemToUpdate);
+            context.SaveChanges();
         }
         catch (Exception ex)
         {
-            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); //500
+            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError);
         }
 
         //respond to client - if successful, return 204 No Content
@@ -121,14 +136,15 @@ public class ToDoItemsController : ControllerBase
         try
         {
             //use LINQ Find method to locate the item by its ID
-            var itemToDelete = items.Find(i => i.ToDoItemId == toDoItemId);
+            var itemToDelete = context.ToDoItems.Find(toDoItemId);
             //it the item is not found, return 404 Not Found
             if (itemToDelete is null)
             {
                 return NotFound(); //404
             }
             //if the item is found, remove it from the list
-            items.Remove(itemToDelete);
+            context.ToDoItems.Remove(itemToDelete);
+            context.SaveChanges();
         }
         catch (Exception ex)
         {
