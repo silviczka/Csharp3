@@ -1,23 +1,23 @@
 namespace ToDoList.WebApi.Controllers;
 
+using Microsoft.AspNetCore.DataProtection.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using ToDoList.Domain.DTOs;
 using ToDoList.Domain.Models;
 using ToDoList.Persistence;
+using ToDoList.Persistence.Repositories;
 
 [ApiController]
 [Route("api/[controller]")]
 public class ToDoItemsController : ControllerBase
 {
-    private readonly ToDoItemsContext context; // class throough which we communicate with database
-    public ToDoItemsController(ToDoItemsContext context)
+    //private readonly ToDoItemsContext context; // class throough which we communicate with database
+    private readonly IRepository<ToDoItem> repository;
+    public ToDoItemsController(IRepository<ToDoItem> repository)
     {
-        this.context = context;
+        this.repository = repository;
     }
 
-    /* public ToDoItemsController()
-    {
-    } */
 
     [HttpPost]
     //DTO data transfer object
@@ -29,15 +29,7 @@ public class ToDoItemsController : ControllerBase
         //try to create and add the item to the list
         try
         {
-            //generate a new ID for the item and add it to the database
-
-            /*OG code:
-/*          item.ToDoItemId = items.Count == 0 ? 1 : items.Max(o => o.ToDoItemId) + 1;
-            items.Add(item); */
-
-            //NEW CODE:  we do not need to set up the rule max +1, the database it doing it itself
-            context.ToDoItems.Add(item);
-            context.SaveChanges();
+            repository.Create(item);
         }
         catch (Exception ex)
         {
@@ -55,44 +47,31 @@ public class ToDoItemsController : ControllerBase
     [HttpGet]
     public ActionResult<IEnumerable<ToDoItemGetResponseDto>> Read()
     {
-        List<ToDoItem> itemsToGet;
-        // Try to retrieve the list of items
         try
         {
-            itemsToGet = context.ToDoItems.ToList();
+            var itemsToGet = repository.Read();
+            //itemsToGet.Any () checks if there are any items in the itemsToGet collection
+            //the ! (not) operator negates the result. So !itemsToGet.Any() returns true if the list is empty
+            return !itemsToGet.Any() ? NotFound() : Ok(itemsToGet.Select(ToDoItemGetResponseDto.FromDomain));
         }
         catch (Exception ex)
         {
             return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); //500
         }
-
-        //respond to client
-        //if the list is null, return 404 not found, else return 200 OK with the List of items mapped to DTOs
-        return (itemsToGet is null || !itemsToGet.Any())
-            ? NotFound() //404
-            : Ok(itemsToGet.Select(ToDoItemGetResponseDto.FromDomain).ToList()); //200
     }
 
     [HttpGet("{toDoItemId:int}")]
     public ActionResult<ToDoItemGetResponseDto> ReadById(int toDoItemId)
     {
-        //try to retrieve the item by its ID
-        ToDoItem? itemToGet;
         try
         {
-            //use LINQ's Find() to search for the item by ID
-            itemToGet = context.ToDoItems.Find(toDoItemId);
+            var itemToGet = repository.ReadById(toDoItemId);
+            return itemToGet is null ? NotFound() : Ok(ToDoItemGetResponseDto.FromDomain(itemToGet));
         }
         catch (Exception ex)
         {
             return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); //500
         }
-
-        //respond to client
-        //if item is not found, return 404 Not Found, else return 200 OK with the item converted to DTO
-        return (itemToGet is null)
-            ? NotFound() //404
-            : Ok(ToDoItemGetResponseDto.FromDomain(itemToGet)); //200
     }
 
     [HttpPut("{toDoItemId:int}")]
@@ -104,8 +83,8 @@ public class ToDoItemsController : ControllerBase
         //try to update the item by retrieving it with given id
         try
         {
-            //find the existing item in the database
-            var itemToUpdate = context.ToDoItems.Find(toDoItemId);
+            //find the existing item in the repository
+            var itemToUpdate = repository.ReadById(toDoItemId);
 
             //if the item is not found, return 404 Not Found
             if (itemToUpdate == null)
@@ -116,9 +95,7 @@ public class ToDoItemsController : ControllerBase
             itemToUpdate.Name = updatedItem.Name;
             itemToUpdate.Description = updatedItem.Description;
             itemToUpdate.IsCompleted = updatedItem.IsCompleted;
-
-            context.ToDoItems.Update(itemToUpdate);
-            context.SaveChanges();
+            repository.Update(itemToUpdate);
         }
         catch (Exception ex)
         {
@@ -135,16 +112,14 @@ public class ToDoItemsController : ControllerBase
         //try to delete the item by finding it first
         try
         {
-            //use LINQ Find method to locate the item by its ID
-            var itemToDelete = context.ToDoItems.Find(toDoItemId);
+            var itemToDelete = repository.ReadById(toDoItemId);
             //it the item is not found, return 404 Not Found
             if (itemToDelete is null)
             {
                 return NotFound(); //404
             }
-            //if the item is found, remove it from the list
-            context.ToDoItems.Remove(itemToDelete);
-            context.SaveChanges();
+            //if the item is found, remove it from the repository
+            repository.Delete(toDoItemId);
         }
         catch (Exception ex)
         {
