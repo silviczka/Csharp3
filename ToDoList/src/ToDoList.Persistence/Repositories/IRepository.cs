@@ -8,9 +8,11 @@ namespace ToDoList.Persistence.Repositories;
 
 public interface IRepository<T> where T : class
 {
-    public void Create(T item);
-    IEnumerable<T> Read();
+    void Create(T item);
+    IEnumerable<T> ReadAll();
     T? ReadById(int id);
-    bool Update(T item);
-    bool Delete(int id);
+    void Update(T item);
+    void DeleteById(int id);
+    void DeleteAll();
+
 }

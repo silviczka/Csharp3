@@ -16,11 +16,11 @@ public class ToDoItemsRepository : IRepository<ToDoItem>
 
     public void Create(ToDoItem item)
     {
-            context.ToDoItems.Add(item);
-            context.SaveChanges();
+        context.ToDoItems.Add(item);
+        context.SaveChanges();
     }
 
-    public IEnumerable<ToDoItem> Read()
+    public IEnumerable<ToDoItem> ReadAll()
     {
         return context.ToDoItems.ToList();
     }
@@ -30,31 +30,42 @@ public class ToDoItemsRepository : IRepository<ToDoItem>
         return context.ToDoItems.Find(id);
     }
 
-    public bool Update(ToDoItem item)
+    public void Update(ToDoItem item)
     {
         var existingItem = context.ToDoItems.Find(item.ToDoItemId);
         //check if the item exists in the database
         if (existingItem == null)
         {
-            return false; //item not found, update failed
+            throw new InvalidOperationException("Item not found for update"); // Throw an exception if the item is not found
         }
         // Update properties if the item exists
         existingItem.Name = item.Name;
         existingItem.Description = item.Description;
         existingItem.IsCompleted = item.IsCompleted;
-        context.ToDoItems.Update(item);
         context.SaveChanges();
-        return true; // update successful
     }
 
-    public bool Delete(int id)
+    public void DeleteAll()
+    {
+        var allItems = context.ToDoItems.ToList(); // Load all items
+        if (!allItems.Any())
+        {
+            throw new InvalidOperationException("No items found for deletion."); // No items to delete
+        }
+        context.ToDoItems.RemoveRange(allItems);
+        context.SaveChanges();
+    }
+
+    public void DeleteById(int id)
     {
         var item = context.ToDoItems.Find(id);
-        if (item != null)
+        if (item == null)
         {
-            context.ToDoItems.Remove(item);
-            context.SaveChanges();
+            throw new InvalidOperationException("Item not found for deletion by ID"); // Throw exception if not found
         }
-        return true;
+        context.ToDoItems.Remove(item);
+        context.SaveChanges();
     }
+
+
 }

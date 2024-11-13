@@ -10,7 +10,7 @@ using ToDoList.WebApi.Controllers;
 public class GetByIdUnitTests
 {
     [Fact]
-    public void GetById_ValidId_ReturnsItem()
+    public void Get_ReadByIdWhenSomeItemAvailable_ReturnsOk()
     {
         // Arrange
         var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
@@ -39,11 +39,14 @@ public class GetByIdUnitTests
         Assert.Equal(toDoItem.Description, value.Description);
         Assert.Equal(toDoItem.IsCompleted, value.IsCompleted);
         Assert.Equal(toDoItem.Name, value.Name);
+        // Verify that ReadById was called with the correct id
+        repositoryMock.Received(1).ReadById(toDoItem.ToDoItemId);
 
     }
 
     [Fact]
-    public void GetById_InvalidId_ReturnsNotFound()
+    public void Get_ReadByIdWhenItemIsNull_ReturnsNotFound()
+
     {
         // Arrange
         var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
@@ -59,5 +62,29 @@ public class GetByIdUnitTests
 
         // Assert
         Assert.IsType<NotFoundResult>(resultResult); // Expecting 404 Not Found
+        repositoryMock.Received(1).ReadById(invalidId);
+
+    }
+   [Fact]
+    public void Get_ReadByIdUnhandledException_ReturnsInternalServerError()
+    {
+        // Arrange
+        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        var controller = new ToDoItemsController(repositoryMock);
+
+        // Simulating an exception in the repository's ReadById method
+        repositoryMock.When(r => r.ReadById(Arg.Any<int>())).Do(x => throw new Exception("Database error"));
+
+        // Act
+        var result = controller.ReadById(1); // Using a valid ID here
+        var resultResult = result.Result;
+
+        // Assert
+        Assert.IsType<ObjectResult>(resultResult); // Expecting 500 Internal Server Error
+        var objectResult = resultResult as ObjectResult;
+        Assert.Equal(500, objectResult.StatusCode);
+
+        // Verify that ReadById was called exactly once
+        repositoryMock.Received(1).ReadById(1);
     }
 }
