@@ -11,7 +11,6 @@ using ToDoList.Persistence.Repositories;
 [Route("api/[controller]")]
 public class ToDoItemsController : ControllerBase
 {
-    //private readonly ToDoItemsContext context; // class throough which we communicate with database
     private readonly IRepository<ToDoItem> repository;
     public ToDoItemsController(IRepository<ToDoItem> repository)
     {
@@ -45,14 +44,17 @@ public class ToDoItemsController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<ToDoItemGetResponseDto>> Read()
+    public ActionResult<IEnumerable<ToDoItemGetResponseDto>> ReadAll()
     {
         try
         {
-            var itemsToGet = repository.Read();
-            //itemsToGet.Any () checks if there are any items in the itemsToGet collection
-            //the ! (not) operator negates the result. So !itemsToGet.Any() returns true if the list is empty
-            return !itemsToGet.Any() ? NotFound() : Ok(itemsToGet.Select(ToDoItemGetResponseDto.FromDomain));
+            var itemsToGet = repository.ReadAll();
+            // Explicitly check for null and empty lists
+            if (itemsToGet == null || !itemsToGet.Any())
+            {
+                return NotFound(); // Return NotFound if no items or if the list is null
+            }
+            return Ok(itemsToGet.Select(ToDoItemGetResponseDto.FromDomain));
         }
         catch (Exception ex)
         {
@@ -119,7 +121,7 @@ public class ToDoItemsController : ControllerBase
                 return NotFound(); //404
             }
             //if the item is found, remove it from the repository
-            repository.Delete(toDoItemId);
+            repository.DeleteById(toDoItemId);
         }
         catch (Exception ex)
         {
@@ -128,5 +130,21 @@ public class ToDoItemsController : ControllerBase
 
         //respond to client - return 204 No Content to indicate successful deletion
         return NoContent(); //204
+    }
+
+    [HttpDelete]
+    [Route("all")]
+    public IActionResult DeleteAll()
+    {
+        try
+        {
+            repository.DeleteAll();
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError);
+        }
+
+        return NoContent(); // Return 204
     }
 }
