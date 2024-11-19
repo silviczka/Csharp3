@@ -1,0 +1,54 @@
+﻿@page "/dashboard"
+@rendermode InteractiveServer
+
+<PageTitle>Dashboard</PageTitle>
+
+<h1>Dashboard</h1>
+
+<table>
+    @foreach (var toDoItem in toDoItems)
+    {
+        <tr>
+            <td>@toDoItem.ToDoItemId</td>
+            <td>@toDoItem.Name</td>
+            <td>@toDoItem.IsCompleted</td>
+            <td>@toDoItem.Description</td>
+        </tr>
+
+    }
+</table>
+
+<br>
+<button @onclick="SortById">Seradit dle cisla ID</button>
+
+<button @onclick="SortByName">Seradit abecedne dle ukolu</button>
+<br>
+
+
+@code
+{
+    private List<ToDoItemView> toDoItems = [
+    new ToDoItemView() {ToDoItemId=1,Name="Udelat ukol na Czechitas",IsCompleted = false},
+new ToDoItemView() {ToDoItemId=2,Name="Udelat nepovinny ukol na Czechitas",IsCompleted = false},
+new ToDoItemView() {ToDoItemId=3,Name="Nakoupit",IsCompleted = false},
+new ToDoItemView() {ToDoItemId=4,Name="Dokoncit projekt",IsCompleted = false}
+    ];
+    public class ToDoItemView
+
+    {
+        public int ToDoItemId { get; set; } // ef core looks for field <id> or <nameId>
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public bool IsCompleted { get; set; }
+
+    }
+    public void SortById()
+    {
+        toDoItems = toDoItems.OrderBy(o => o.ToDoItemId).ToList();
+    }
+    public void SortByName()
+    {
+        toDoItems = toDoItems.OrderBy(o => o.Name).ToList();
+    }
+
+}
