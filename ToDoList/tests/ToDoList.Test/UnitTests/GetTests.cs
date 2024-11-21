@@ -22,30 +22,37 @@ public class GetUnitTests
     [Fact]
     public void Get_ReadWhenSomeItemIsAvailable_ReturnsOk()
     {
-        /*
-        repositoryMock.When().Do(); //generic if >> then
-        repositoryMock.ReadAll().Returns();  //we set return value
-        repositoryMock.ReadAll().ReturnsNull(); // we set return value to zero
-        repositoryMock.ReadAll().Throws();  //we throw exception
-        repositoryMock.Received().ReadAll(); //we controll calling of a method */
-
         // Arrange
         var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
         var controller = new ToDoItemsController(repositoryMock);
-        repositoryMock.ReadAll().Returns(
-            [
-                new ToDoItem{
-                    Name = "testName",
+        repositoryMock.ReadAll().Returns(new List<ToDoItem>
+        {
+
+                new ToDoItem
+                {
+                    Name = "testName1",
                     Description = "testDescription",
-                    IsCompleted = false
+                    IsCompleted = false,
+                    Category = "something"
+                },
+                new ToDoItem
+                {
+                    Name = "testName2",
+                    Description = "testDescription",
+                    IsCompleted = false,
+                    Category = null
                 }
-            ]
-            );
+        });
         // Act
         var result = controller.ReadAll();
         var resultResult = result.Result;
         // Assert
         Assert.IsType<OkObjectResult>(resultResult);
+        var okResult = resultResult as OkObjectResult;
+        var value = okResult.Value as IEnumerable<ToDoItemGetResponseDto>;
+
+        Assert.NotNull(value);
+        Assert.Equal(2,value.Count());
         repositoryMock.Received(1).ReadAll();
     }
 
@@ -55,7 +62,6 @@ public class GetUnitTests
         // Arrange
         var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
         var controller = new ToDoItemsController(repositoryMock);
-        // repositoryMock.ReadAll().ReturnsNull();
         repositoryMock.ReadAll().Returns(null as IEnumerable<ToDoItem>);
         // Act
         var result = controller.ReadAll();
@@ -78,7 +84,8 @@ public class GetUnitTests
         // Assert
         Assert.IsType<ObjectResult>(resultResult);
         repositoryMock.Received(1).ReadAll();
-        Assert.Equivalent(new StatusCodeResult(StatusCodes.Status500InternalServerError), resultResult);
+        var objectResult = resultResult as ObjectResult;
+        Assert.Equal(StatusCodes.Status500InternalServerError, objectResult.StatusCode);
     }
 
     [Fact]
@@ -90,8 +97,8 @@ public class GetUnitTests
         var controller = new ToDoItemsController(repositoryMock);
         var toDoItems = new List<ToDoItem>
         {
-            new ToDoItem { ToDoItemId = 1, Name = "Item 1", Description = "Description 1", IsCompleted = false },
-            new ToDoItem { ToDoItemId = 2, Name = "Item 2", Description = "Description 2", IsCompleted = true }
+            new ToDoItem { ToDoItemId = 1, Name = "Item 1", Description = "Description 1", IsCompleted = false, Category = null },
+            new ToDoItem { ToDoItemId = 2, Name = "Item 2", Description = "Description 2", IsCompleted = true, Category = "important" }
         };
         //Mock the Read method to return the list of items
         repositoryMock.ReadAll().Returns(toDoItems);
@@ -113,5 +120,14 @@ public class GetUnitTests
         Assert.Equal(toDoItems[0].Description, firstItem.Description);
         Assert.Equal(toDoItems[0].IsCompleted, firstItem.IsCompleted);
         Assert.Equal(toDoItems[0].Name, firstItem.Name);
+        Assert.Equal(toDoItems[0].Category, firstItem.Category);
+        Assert.Null(firstItem.Category);
+        
+        var secondItem = value.Last();
+        Assert.Equal(toDoItems[1].ToDoItemId, secondItem.Id);
+        Assert.Equal(toDoItems[1].Description, secondItem.Description);
+        Assert.Equal(toDoItems[1].IsCompleted, secondItem.IsCompleted);
+        Assert.Equal(toDoItems[1].Name, secondItem.Name);
+        Assert.Equal(toDoItems[1].Category, secondItem.Category);
     }
 }

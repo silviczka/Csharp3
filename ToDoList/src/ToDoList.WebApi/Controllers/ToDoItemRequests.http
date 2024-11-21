@@ -19,23 +19,25 @@ POST {{host}}:{{port}}/api/ToDoItems
 Content-Type: application/json
 
 {
-  "name": "Example New Task",
-  "description": "Example New Description",
-  "isCompleted": false
+  "name": "Zapsat si co se mi v noci zdalo",
+  "description": "Upadla jsem z postele",
+  "isCompleted": false,
+  "Category":"urgent"
 }
 
 ###
 
 //Update existing ToDoItem by id
-@itemToUpdateId = 9
+@itemToUpdateId = 17
 
 PUT {{host}}:{{port}}/api/ToDoItems/{{itemToUpdateId}}
 Content-Type: application/json
 
 {
-  "name": "Updated Task",
-  "description": "Updated Description",
-  "isCompleted": false
+  "name": "Zapsat si co se mi v noci zdalo",
+  "description": "Spadla jsem z postele",
+  "isCompleted": false,
+  "Category":"urgent"
 }
 
 ###

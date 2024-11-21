@@ -13,12 +13,40 @@ namespace ToDoList.Test;
 public class PutUnitTests
 {
     [Fact]
-    public void Put_UpdateByIdWhenItemUpdated_Returns204NoContent()
+    public void Put_UpdateByIdWhenItemUpdated_CategoryProvided_Returns204NoContent()
     {
         var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
         var controller = new ToDoItemsController(repositoryMock);
         int testId = 1;
         var existingToDoItem = new ToDoItem { ToDoItemId = testId, Name = "Old Name", Description = "Old Description", IsCompleted = false };
+
+        var updateDto = new ToDoItemUpdateRequestDto("Updated Name", "Updated Description", true, "something");
+
+        repositoryMock.ReadById(testId).Returns(existingToDoItem);
+        repositoryMock.When(r => r.Update(Arg.Any<ToDoItem>())).Do(x => { }); // Simulate successful update
+
+        // Act
+        var result = controller.UpdateById(testId, updateDto); // Call the method to update the item on position 1 with parameters of updateDto
+
+        // Assert
+        Assert.IsType<NoContentResult>(result); // Expecting 204 No Content
+
+        // Verify that the Update method was called with expected values
+        repositoryMock.Received(1).Update(Arg.Is<ToDoItem>(item =>
+            item.ToDoItemId == testId &&
+            item.Name == updateDto.Name &&
+            item.Description == updateDto.Description &&
+            item.IsCompleted == updateDto.IsCompleted &&
+            item.Category == updateDto.Category));
+    }
+
+    [Fact]
+    public void Put_UpdateByIdWhenItemUpdated_CategorySetToNull_Returns204NoContent()
+    {
+        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        var controller = new ToDoItemsController(repositoryMock);
+        int testId = 1;
+        var existingToDoItem = new ToDoItem { ToDoItemId = testId, Name = "Old Name", Description = "Old Description", IsCompleted = false, Category = "something" };
 
         var updateDto = new ToDoItemUpdateRequestDto("Updated Name", "Updated Description", true);
 
@@ -36,7 +64,8 @@ public class PutUnitTests
             item.ToDoItemId == testId &&
             item.Name == updateDto.Name &&
             item.Description == updateDto.Description &&
-            item.IsCompleted == updateDto.IsCompleted));
+            item.IsCompleted == updateDto.IsCompleted &&
+            item.Category == null));
     }
 
     [Fact]

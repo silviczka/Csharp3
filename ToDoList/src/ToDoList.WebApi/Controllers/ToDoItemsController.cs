@@ -97,6 +97,7 @@ public class ToDoItemsController : ControllerBase
             itemToUpdate.Name = updatedItem.Name;
             itemToUpdate.Description = updatedItem.Description;
             itemToUpdate.IsCompleted = updatedItem.IsCompleted;
+            itemToUpdate.Category = updatedItem.Category;
             repository.Update(itemToUpdate);
         }
         catch (Exception ex)

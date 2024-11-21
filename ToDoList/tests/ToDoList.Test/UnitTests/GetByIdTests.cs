@@ -20,7 +20,8 @@ public class GetByIdUnitTests
             ToDoItemId = 1,
             Name = "Jmeno",
             Description = "Popis",
-            IsCompleted = false
+            IsCompleted = false,
+            Category = "something"
         };
         // Mock the ReadById method to return the ToDoItem for the valid ID
         repositoryMock.ReadById(toDoItem.ToDoItemId).Returns(toDoItem);
@@ -39,6 +40,43 @@ public class GetByIdUnitTests
         Assert.Equal(toDoItem.Description, value.Description);
         Assert.Equal(toDoItem.IsCompleted, value.IsCompleted);
         Assert.Equal(toDoItem.Name, value.Name);
+        Assert.Equal(toDoItem.Category, value.Category);
+        // Verify that ReadById was called with the correct id
+        repositoryMock.Received(1).ReadById(toDoItem.ToDoItemId);
+
+    }
+    [Fact]
+    public void Get_ReadByIdWhenSomeItemAvailable_CategoryNull_ReturnsOk()
+    {
+        // Arrange
+        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        var controller = new ToDoItemsController(repositoryMock);
+        var toDoItem = new ToDoItem
+        {
+            ToDoItemId = 1,
+            Name = "Jmeno",
+            Description = "Popis",
+            IsCompleted = false,
+            Category = null
+        };
+        // Mock the ReadById method to return the ToDoItem for the valid ID
+        repositoryMock.ReadById(toDoItem.ToDoItemId).Returns(toDoItem);
+
+        // Act
+        var result = controller.ReadById(toDoItem.ToDoItemId);
+        var resultResult = result.Result;
+
+        // Assert
+        Assert.IsType<OkObjectResult>(resultResult); // Expecting 200 OK
+        var okResult = resultResult as OkObjectResult;
+        var value = okResult.Value as ToDoItemGetResponseDto;
+
+        Assert.NotNull(value);
+        Assert.Equal(toDoItem.ToDoItemId, value.Id);
+        Assert.Equal(toDoItem.Description, value.Description);
+        Assert.Equal(toDoItem.IsCompleted, value.IsCompleted);
+        Assert.Equal(toDoItem.Name, value.Name);
+        Assert.Equal(toDoItem.Category, value.Category);
         // Verify that ReadById was called with the correct id
         repositoryMock.Received(1).ReadById(toDoItem.ToDoItemId);
 
