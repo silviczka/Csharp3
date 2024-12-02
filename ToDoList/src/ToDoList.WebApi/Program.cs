@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddSwaggerGen();
     //Persistence Services
     builder.Services.AddDbContext<ToDoItemsContext>(); //adds ToDoItemsContext
-    builder.Services.AddScoped<IRepository<ToDoItem>,ToDoItemsRepository>();  //adds ToDoItemsRepository
+    builder.Services.AddScoped<IRepositoryAsync<ToDoItem>,ToDoItemsRepository>();  //adds ToDoItemsRepository
 }
 var app = builder.Build();
 {

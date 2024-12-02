@@ -13,10 +13,10 @@ namespace ToDoList.Test;
 public class PostUnitTests
 {
     [Fact]
-    public void Post_CreateValidRequest_HasCategory_ReturnsCreatedAtAction()
+    public async Task Post_CreateValidRequest_HasCategory_ReturnsCreatedAtAction()
     {
         // Arrange
-        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        var repositoryMock = Substitute.For<IRepositoryAsync<ToDoItem>>();
         var controller = new ToDoItemsController(repositoryMock);
         var requestDto = new ToDoItemCreateRequestDto("Test Name", "Test Description", false, "something"); //we expect the new ToDoItem will not be completed at the time of creation
         var createdItem = new ToDoItem
@@ -28,11 +28,11 @@ public class PostUnitTests
             Category = requestDto.Category
         };
         // Configure repository mock to simulate the successful creation
-        repositoryMock.When(r => r.Create(Arg.Any<ToDoItem>())).Do(x => { });
-        repositoryMock.ReadById(Arg.Is<int>(id => id == 1)).Returns(createdItem);
+        repositoryMock.When(r => r.CreateAsync(Arg.Any<ToDoItem>())).Do(x => { });
+        repositoryMock.ReadByIdAsync(Arg.Is<int>(id => id == 1)).Returns(createdItem);
 
         // Act
-        var result = controller.Create(requestDto);
+        var result = await controller.CreateAsync(requestDto);
         var createdAtActionResult = result.Result as CreatedAtActionResult;
         var value = createdAtActionResult?.Value as ToDoItemGetResponseDto;
 
@@ -47,7 +47,7 @@ public class PostUnitTests
         Assert.Equal(requestDto.Category, value.Category);
 
         // Verify that the Create method was called once with a ToDoItem that matches the DTO properties
-        repositoryMock.Received(1).Create(Arg.Is<ToDoItem>(
+        repositoryMock.Received(1).CreateAsync(Arg.Is<ToDoItem>(
             item => item.Name == requestDto.Name &&
                     item.Description == requestDto.Description &&
                     item.IsCompleted == requestDto.IsCompleted &&
@@ -55,10 +55,10 @@ public class PostUnitTests
     }
 
     [Fact]
-    public void Post_CreateValidRequest_NullCategory_ReturnsCreatedAtAction()
+    public async Task Post_CreateValidRequest_NullCategory_ReturnsCreatedAtAction()
     {
         // Arrange
-        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        var repositoryMock = Substitute.For<IRepositoryAsync<ToDoItem>>();
         var controller = new ToDoItemsController(repositoryMock);
         var requestDto = new ToDoItemCreateRequestDto("Test Name", "Test Description", false); //we expect the new ToDoItem will not be completed at the time of creation
         var createdItem = new ToDoItem
@@ -70,11 +70,11 @@ public class PostUnitTests
             Category = requestDto.Category
         };
         // Configure repository mock to simulate the successful creation
-        repositoryMock.When(r => r.Create(Arg.Any<ToDoItem>())).Do(x => { });
-        repositoryMock.ReadById(Arg.Is<int>(id => id == 1)).Returns(createdItem);
+        repositoryMock.When(r => r.CreateAsync(Arg.Any<ToDoItem>())).Do(x => { });
+        repositoryMock.ReadByIdAsync(Arg.Is<int>(id => id == 1)).Returns(createdItem);
 
         // Act
-        var result = controller.Create(requestDto);
+        var result = await controller.CreateAsync(requestDto);
         var createdAtActionResult = result.Result as CreatedAtActionResult;
         var value = createdAtActionResult?.Value as ToDoItemGetResponseDto;
 
@@ -89,7 +89,7 @@ public class PostUnitTests
         Assert.Null(value.Category);
 
         // Verify that the Create method was called once with a ToDoItem that matches the DTO properties
-        repositoryMock.Received(1).Create(Arg.Is<ToDoItem>(
+        repositoryMock.Received(1).CreateAsync(Arg.Is<ToDoItem>(
             item => item.Name == requestDto.Name &&
                     item.Description == requestDto.Description &&
                     item.IsCompleted == requestDto.IsCompleted &&
@@ -97,19 +97,19 @@ public class PostUnitTests
     }
 
     [Fact]
-    public void Post_CreateUnhandledException_Returns500InternalServerError()
+    public async Task Post_CreateUnhandledException_Returns500InternalServerError()
     {
         // Arrange
-        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        var repositoryMock = Substitute.For<IRepositoryAsync<ToDoItem>>();
         var controller = new ToDoItemsController(repositoryMock);
 
         var requestDto = new ToDoItemCreateRequestDto("Test Name", "Test Description", false);
 
         // Configure repository mock to throw an exception, simulating a 500 error
-        repositoryMock.When(r => r.Create(Arg.Any<ToDoItem>())).Do(r => throw new Exception());
+        repositoryMock.When(r => r.CreateAsync(Arg.Any<ToDoItem>())).Do(r => throw new Exception());
 
         // Act
-        var result = controller.Create(requestDto);
+        var result = await controller.CreateAsync(requestDto);
 
         // Assert
         Assert.IsType<ObjectResult>(result.Result); // Expecting 500 Internal Server Error

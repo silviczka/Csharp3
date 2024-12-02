@@ -1,6 +1,7 @@
 ﻿@using ToDoList.Frontend.Views
 @using ToDoList.Frontend.Clients
 @inject IToDoItemsClient ToDoItemsClient
+@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 @page "/dashboard"
 
@@ -15,6 +16,7 @@
             <th style="border: 1px solid black; padding: 8px;">Description</th>
             <th style="border: 1px solid black; padding: 8px;">Completed</th> <!-- Set width for Completed -->
             <th style="border: 1px solid black; padding: 8px;">Category</th> <!-- Set width for Category -->
+            <th style="border: 1px solid black; padding: 8px;">Action</th>
         </tr>
     </thead>
     @if (toDoItems is null)
@@ -25,23 +27,25 @@
     {
         @foreach (var toDoItem in toDoItems)
         {
-            <tr>
+            <tr class="@GetCorrectClassFortableLine(toDoItem.IsCompleted)">
                 <td>@toDoItem.ToDoItemId</td>
                 <td>@toDoItem.Name</td>
                 <td>@toDoItem.Description</td>
                 <td>@toDoItem.IsCompleted</td>
                 <td>@toDoItem.Category</td>
+                <td><button class="btn btn-primary btn-success" @onclick="() => EditItem(toDoItem)">Edit</button></td>
             </tr>
 
         }
     }
 </table>
-
+<thead>
 <br>
-<button @onclick="SortById">Seradit dle cisla ID</button>
+<th><button type="button" class="btn btn-primary" @onclick="SortById">Seradit dle cisla ID</button></th>
 
-<button @onclick="SortByName">Seradit abecedne dle ukolu</button>
+<th><button @onclick="SortByName">Seradit abecedne dle ukolu</button></th>
 <br>
+</thead>
 
 
 @code
@@ -68,4 +72,16 @@
         }
     }
 
+    public string GetCorrectClassFortableLine(bool isCompleted)
+    {
+        return isCompleted? "table-success" : "table-secondary";
+
+    }
+
+    public void EditItem(ToDoItemView toDoItem)
+    {
+        NavigationManager.NavigateTo($"editToDoItem/{toDoItem.ToDoItemId}");
+    }
+
 }
+

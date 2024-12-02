@@ -19,9 +19,9 @@ POST {{host}}:{{port}}/api/ToDoItems
 Content-Type: application/json
 
 {
-  "name": "Zapsat si co se mi v noci zdalo",
+  "name": "Natocit video",
   "description": "Upadla jsem z postele",
-  "isCompleted": false,
+  "isCompleted": true,
   "Category":"urgent"
 }
 

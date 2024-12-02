@@ -20,12 +20,12 @@ using NSubstitute.ExceptionExtensions;
 public class GetUnitTests
 {
     [Fact]
-    public void Get_ReadWhenSomeItemIsAvailable_ReturnsOk()
+    public async Task Get_ReadWhenSomeItemIsAvailable_ReturnsOk()
     {
         // Arrange
-        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        var repositoryMock = Substitute.For<IRepositoryAsync<ToDoItem>>();
         var controller = new ToDoItemsController(repositoryMock);
-        repositoryMock.ReadAll().Returns(new List<ToDoItem>
+        repositoryMock.ReadAllAsync().Returns(new List<ToDoItem>
         {
 
                 new ToDoItem
@@ -44,7 +44,7 @@ public class GetUnitTests
                 }
         });
         // Act
-        var result = controller.ReadAll();
+        var result = await controller.ReadAllAsync();
         var resultResult = result.Result;
         // Assert
         Assert.IsType<OkObjectResult>(resultResult);
@@ -53,47 +53,47 @@ public class GetUnitTests
 
         Assert.NotNull(value);
         Assert.Equal(2,value.Count());
-        repositoryMock.Received(1).ReadAll();
+        repositoryMock.Received(1).ReadAllAsync();
     }
 
     [Fact]
-    public void Get_ReadWhenNoItemAvailable_ReturnsNotFound()
+    public async Task Get_ReadWhenNoItemAvailable_ReturnsNotFound()
     {
         // Arrange
-        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        var repositoryMock = Substitute.For<IRepositoryAsync<ToDoItem>>();
         var controller = new ToDoItemsController(repositoryMock);
-        repositoryMock.ReadAll().Returns(null as IEnumerable<ToDoItem>);
+        repositoryMock.ReadAllAsync().Returns(null as IEnumerable<ToDoItem>);
         // Act
-        var result = controller.ReadAll();
+        var result = await controller.ReadAllAsync();
         var resultResult = result.Result;
         // Assert
         Assert.IsType<NotFoundResult>(resultResult);
-        repositoryMock.Received(1).ReadAll();
+        repositoryMock.Received(1).ReadAllAsync();
     }
 
     [Fact]
-    public void Get_ReadUnhandledException_ReturnsInternalServerError()
+    public async Task Get_ReadUnhandledException_ReturnsInternalServerError()
     {
         // Arrange
-        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        var repositoryMock = Substitute.For<IRepositoryAsync<ToDoItem>>();
         var controller = new ToDoItemsController(repositoryMock);
-        repositoryMock.ReadAll().Throws(new Exception());
+        repositoryMock.ReadAllAsync().Throws(new Exception());
         // Act
-        var result = controller.ReadAll();
+        var result = await controller.ReadAllAsync();
         var resultResult = result.Result;
         // Assert
         Assert.IsType<ObjectResult>(resultResult);
-        repositoryMock.Received(1).ReadAll();
+        repositoryMock.Received(1).ReadAllAsync();
         var objectResult = resultResult as ObjectResult;
         Assert.Equal(StatusCodes.Status500InternalServerError, objectResult.StatusCode);
     }
 
     [Fact]
     //the method "get all items - returns all items" is testing whether the controller correctly returns all ToDoItems
-    public void Get_AllItems_ReturnsAllItems()
+    public async Task Get_AllItems_ReturnsAllItems()
     {
         // Arrange - here we set up the objects we will use in the test
-        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        var repositoryMock = Substitute.For<IRepositoryAsync<ToDoItem>>();
         var controller = new ToDoItemsController(repositoryMock);
         var toDoItems = new List<ToDoItem>
         {
@@ -101,10 +101,10 @@ public class GetUnitTests
             new ToDoItem { ToDoItemId = 2, Name = "Item 2", Description = "Description 2", IsCompleted = true, Category = "important" }
         };
         //Mock the Read method to return the list of items
-        repositoryMock.ReadAll().Returns(toDoItems);
+        repositoryMock.ReadAllAsync().Returns(toDoItems);
 
         // Act - here we call method we want to test
-        var result = controller.ReadAll();
+        var result = await controller.ReadAllAsync();
         var resultResult = result.Result;
 
         // Assert
@@ -122,7 +122,7 @@ public class GetUnitTests
         Assert.Equal(toDoItems[0].Name, firstItem.Name);
         Assert.Equal(toDoItems[0].Category, firstItem.Category);
         Assert.Null(firstItem.Category);
-        
+
         var secondItem = value.Last();
         Assert.Equal(toDoItems[1].ToDoItemId, secondItem.Id);
         Assert.Equal(toDoItems[1].Description, secondItem.Description);
