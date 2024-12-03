@@ -12,14 +12,22 @@
 {
 
     <EditForm Model="ToDoItem" FormName="EditToDoItem" OnSubmit="Submit">
-        <InputText id="Name" @bind-Value="ToDoItem.Name"/>
-        <InputText id="Description" @bind-Value="ToDoItem.Description"/>
-        <InputCheckbox id="IsCompleted" @bind-Value="ToDoItem.IsCompleted"/>
-        <button type="submit"> Submit</button>
+        <InputText id="Name" @bind-Value="ToDoItem.Name" class="form-control mb-3" />
+        <InputText id="Description" @bind-Value="ToDoItem.Description" class="form-control mb-3" />
+        <InputCheckbox id="IsCompleted" @bind-Value="ToDoItem.IsCompleted" class="mb-3" />
+        <InputText id="Category" @bind-Value="ToDoItem.Category" class="form-control mb-3" />
+        <button type="submit" class="btn btn-primary">Submit</button>
     </EditForm>
-    @ToDoItem.Name;
-    @ToDoItem.Description;
-    @ToDoItem.IsCompleted;
+
+    <div class="mt-3">
+        <strong>Name:</strong> @ToDoItem.Name
+        <br />
+        <strong>Description:</strong> @ToDoItem.Description
+        <br />
+        <strong>Completed:</strong> @ToDoItem.IsCompleted
+        <br />
+        <strong>Category:</strong> @ToDoItem.Category
+    </div>
 }
 
 @code
@@ -37,6 +45,7 @@
 
     {
         await ToDoItemsClient.UpdateItemAsync(ToDoItem);
+        NavigationManager.NavigateTo("/dashboard");
     }
 
 }

@@ -14,7 +14,7 @@ public class ToDoItemsClient : IToDoItemsClient
 
     public async Task CreateItemAsync(ToDoItemView itemView)
     {
-        var itemRequest = new ToDoItemCreateRequestDto(itemView.Name, itemView.Description, itemView.IsCompleted);
+        var itemRequest = new ToDoItemCreateRequestDto(itemView.Name, itemView.Description, itemView.IsCompleted,itemView.Category ?? null);
         try
         {
             var response = await httpClient.PostAsJsonAsync("api/ToDoItems", itemRequest);
@@ -112,7 +112,7 @@ public class ToDoItemsClient : IToDoItemsClient
     {
         try
         {
-            var itemRequest = new ToDoItemUpdateRequestDto(itemView.Name, itemView.Description, itemView.IsCompleted);
+            var itemRequest = new ToDoItemUpdateRequestDto(itemView.Name, itemView.Description, itemView.IsCompleted,itemView.Category ?? null);
             var response = await httpClient.PutAsJsonAsync($"api/ToDoItems/{itemView.ToDoItemId}", itemRequest);
             if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
             {
