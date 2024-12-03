@@ -11,9 +11,8 @@ using ToDoList.Persistence.Repositories;
 [Route("api/[controller]")]
 public class ToDoItemsController : ControllerBase
 {
-    //private readonly ToDoItemsContext context; // class throough which we communicate with database
-    private readonly IRepository<ToDoItem> repository;
-    public ToDoItemsController(IRepository<ToDoItem> repository)
+    private readonly IRepositoryAsync<ToDoItem> repository;
+    public ToDoItemsController(IRepositoryAsync<ToDoItem> repository)
     {
         this.repository = repository;
     }
@@ -21,7 +20,7 @@ public class ToDoItemsController : ControllerBase
 
     [HttpPost]
     //DTO data transfer object
-    public ActionResult<ToDoItemGetResponseDto> Create(ToDoItemCreateRequestDto request)
+    public async Task <ActionResult<ToDoItemGetResponseDto>> CreateAsync(ToDoItemCreateRequestDto request)
     {
         //map DTO to Domain object as soon as possible
         var item = request.ToDomain();
@@ -29,7 +28,7 @@ public class ToDoItemsController : ControllerBase
         //try to create and add the item to the list
         try
         {
-            repository.Create(item);
+            repository.CreateAsync(item);
         }
         catch (Exception ex)
         {
@@ -39,43 +38,46 @@ public class ToDoItemsController : ControllerBase
 
         //respond to client - return a 201 response and provide a location for the created item
         return CreatedAtAction(
-            nameof(ReadById),  //Action that retrieves the item by ID
+            nameof(ReadByIdAsync),  //Action that retrieves the item by ID
             new { toDoItemId = item.ToDoItemId },   // Route values for the action
             ToDoItemGetResponseDto.FromDomain(item)); //201 status code - response body with the created item
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<ToDoItemGetResponseDto>> Read()
+    public async Task<ActionResult<IEnumerable<ToDoItemGetResponseDto>>> ReadAllAsync()
     {
         try
         {
-            var itemsToGet = repository.Read();
-            //itemsToGet.Any () checks if there are any items in the itemsToGet collection
-            //the ! (not) operator negates the result. So !itemsToGet.Any() returns true if the list is empty
-            return !itemsToGet.Any() ? NotFound() : Ok(itemsToGet.Select(ToDoItemGetResponseDto.FromDomain));
+            var itemsToGet = await repository.ReadAllAsync();
+            // Explicitly check for null and empty lists
+            if (itemsToGet == null || !itemsToGet.Any())
+            {
+                return NotFound(); // Return NotFound if no items or if the list is null
+            }
+            return Ok(itemsToGet.Select(ToDoItemGetResponseDto.FromDomain));
         }
         catch (Exception ex)
         {
-            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); //500
+            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError);
         }
     }
 
     [HttpGet("{toDoItemId:int}")]
-    public ActionResult<ToDoItemGetResponseDto> ReadById(int toDoItemId)
+    public async Task<ActionResult<ToDoItemGetResponseDto>> ReadByIdAsync(int toDoItemId)
     {
         try
         {
-            var itemToGet = repository.ReadById(toDoItemId);
+            var itemToGet = await repository.ReadByIdAsync(toDoItemId);
             return itemToGet is null ? NotFound() : Ok(ToDoItemGetResponseDto.FromDomain(itemToGet));
         }
         catch (Exception ex)
         {
-            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); //500
+            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError);
         }
     }
 
     [HttpPut("{toDoItemId:int}")]
-    public IActionResult UpdateById(int toDoItemId, [FromBody] ToDoItemUpdateRequestDto request)
+    public async Task <IActionResult> UpdateByIdAsync(int toDoItemId, [FromBody] ToDoItemUpdateRequestDto request)
     {
         //map the request DTO to a domain object as soon as possible
         var updatedItem = request.ToDomain();
@@ -84,7 +86,7 @@ public class ToDoItemsController : ControllerBase
         try
         {
             //find the existing item in the repository
-            var itemToUpdate = repository.ReadById(toDoItemId);
+            var itemToUpdate = await repository.ReadByIdAsync(toDoItemId);
 
             //if the item is not found, return 404 Not Found
             if (itemToUpdate == null)
@@ -95,7 +97,8 @@ public class ToDoItemsController : ControllerBase
             itemToUpdate.Name = updatedItem.Name;
             itemToUpdate.Description = updatedItem.Description;
             itemToUpdate.IsCompleted = updatedItem.IsCompleted;
-            repository.Update(itemToUpdate);
+            itemToUpdate.Category = updatedItem.Category;
+            await repository.UpdateAsync(itemToUpdate);
         }
         catch (Exception ex)
         {
@@ -107,19 +110,19 @@ public class ToDoItemsController : ControllerBase
     }
 
     [HttpDelete("{toDoItemId:int}")]
-    public IActionResult DeleteById(int toDoItemId)
+    public async Task<IActionResult> DeleteByIdAsync(int toDoItemId)
     {
         //try to delete the item by finding it first
         try
         {
-            var itemToDelete = repository.ReadById(toDoItemId);
+            var itemToDelete = await repository.ReadByIdAsync(toDoItemId);
             //it the item is not found, return 404 Not Found
             if (itemToDelete is null)
             {
                 return NotFound(); //404
             }
             //if the item is found, remove it from the repository
-            repository.Delete(toDoItemId);
+            await repository.DeleteByIdAsync(toDoItemId);
         }
         catch (Exception ex)
         {
@@ -128,5 +131,21 @@ public class ToDoItemsController : ControllerBase
 
         //respond to client - return 204 No Content to indicate successful deletion
         return NoContent(); //204
+    }
+
+    [HttpDelete]
+    [Route("all")]
+    public async Task<IActionResult> DeleteAllAsync()
+    {
+        try
+        {
+            await repository.DeleteAllAsync();
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError);
+        }
+
+        return NoContent(); // Return 204
     }
 }

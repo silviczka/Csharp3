@@ -1,0 +1,107 @@
+﻿@using ToDoList.Frontend.Views
+@using ToDoList.Frontend.Clients
+@inject IToDoItemsClient ToDoItemsClient
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+@page "/dashboard"
+
+<PageTitle>Dashboard</PageTitle>
+
+<h1>Dashboard</h1>
+<table style="width: 65%; border-collapse: collapse; text-align: center;">
+    <thead>
+        <tr>
+            <th style="border: 1px solid black; padding: 8px;">ID</th> <!-- Set width for ID -->
+            <th style="border: 1px solid black; padding: 8px;">Name</th>
+            <th style="border: 1px solid black; padding: 8px;">Description</th>
+            <th style="border: 1px solid black; padding: 8px;">Completed</th> <!-- Set width for Completed -->
+            <th style="border: 1px solid black; padding: 8px;">Category</th> <!-- Set width for Category -->
+            <th style="border: 1px solid black; padding: 8px;">Action</th>
+        </tr>
+    </thead>
+    @if (toDoItems is null)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        @foreach (var toDoItem in toDoItems)
+        {
+            <tr class="@GetCorrectClassFortableLine(toDoItem.IsCompleted)">
+                <td>@toDoItem.ToDoItemId</td>
+                <td>@toDoItem.Name</td>
+                <td>@toDoItem.Description</td>
+                <td>@toDoItem.IsCompleted</td>
+                <td>@toDoItem.Category</td>
+                <td>
+                    <button class="btn btn-primary btn-success" @onclick="() => EditItem(toDoItem)">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-danger" @onclick="() => DeleteItem(toDoItem)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    <button class="btn btn-warning" @onclick="() => ToggleCompletionStatus(toDoItem)">
+                        <i class="bi bi-check-circle"></i>
+                    </button>
+                </td>
+            </tr>
+
+        }
+    }
+</table>
+<thead>
+    <br>
+    <th><button type="button" class="btn btn-primary" @onclick="SortById">Seradit dle cisla ID</button></th>
+
+    <th><button @onclick="SortByName">Seradit abecedne dle ukolu</button></th>
+    <br>
+</thead>
+
+
+@code
+{
+    private List<ToDoItemView>? toDoItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        toDoItems = await ToDoItemsClient.ReadItemsAsync();
+    }
+
+    public void SortById()
+    {
+        if (toDoItems is not null)
+        {
+            toDoItems = toDoItems.OrderBy(o => o.ToDoItemId).ToList();
+        }
+    }
+    public void SortByName()
+    {
+        if (toDoItems is not null)
+        {
+            toDoItems = toDoItems.OrderBy(o => o.Name).ToList();
+        }
+    }
+
+    public string GetCorrectClassFortableLine(bool isCompleted)
+    {
+        return isCompleted ? "table-success" : "table-secondary";
+
+    }
+
+    public void EditItem(ToDoItemView toDoItem)
+    {
+        NavigationManager.NavigateTo($"editToDoItem/{toDoItem.ToDoItemId}");
+    }
+
+    public async Task DeleteItem(ToDoItemView toDoItem)
+    {
+        await ToDoItemsClient.DeleteItemAsync(toDoItem);
+        toDoItems.Remove(toDoItem);
+    }
+
+    public async Task ToggleCompletionStatus(ToDoItemView toDoItem)
+    {
+        toDoItem.IsCompleted = !toDoItem.IsCompleted; // Toggle completion
+        await ToDoItemsClient.UpdateItemAsync(toDoItem); // Update on the server
+    }
+}

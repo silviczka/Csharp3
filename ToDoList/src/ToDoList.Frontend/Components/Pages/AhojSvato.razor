@@ -1,0 +1,43 @@
+﻿@page "/ahojSvato"
+
+<PageTitle>Cau Svato</PageTitle>
+
+<h1>@ahojSvato</h1>
+<Dashboard/>
+
+Vitaj v mojej appke.
+
+@code
+{
+    string ahojSvato = "Ahoj Sváťo! Tě srdečně zdravím!";
+}
+
+<h2>Nadpis 2.urovne</h2>
+
+Vitaj v doma.
+<p>Toto je odstavec <br> se zalomenym textem<br>@VypisCisla1Az10()</p>
+<br>
+<button @onclick="Increment">Moje Tlacitko</button>
+<br>
+Hodnota pocitadla @counter;
+
+@code
+{
+    //string ahojSvato = "Ahoj Sváťo! Zdravím tě z letadla!";
+    int counter=0;
+    public void Increment()
+    {
+        counter++;
+    }
+
+    public string VypisCisla1Az10()
+    {
+        string vypis ="";
+        for (int i = 1; i<=10; i++)
+        {
+            vypis +=i+" ";
+
+        }
+        return vypis;
+    }
+}

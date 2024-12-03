@@ -19,23 +19,25 @@ POST {{host}}:{{port}}/api/ToDoItems
 Content-Type: application/json
 
 {
-  "name": "Example New Task",
-  "description": "Example New Description",
-  "isCompleted": false
+  "name": "Natocit video",
+  "description": "Upadla jsem z postele",
+  "isCompleted": true,
+  "Category":"urgent"
 }
 
 ###
 
 //Update existing ToDoItem by id
-@itemToUpdateId = 6
+@itemToUpdateId = 17
 
 PUT {{host}}:{{port}}/api/ToDoItems/{{itemToUpdateId}}
 Content-Type: application/json
 
 {
-  "name": "Updated Task",
-  "description": "Updated Description",
-  "isCompleted": false
+  "name": "Zapsat si co se mi v noci zdalo",
+  "description": "Spadla jsem z postele",
+  "isCompleted": false,
+  "Category":"urgent"
 }
 
 ###
@@ -43,3 +45,8 @@ Content-Type: application/json
 //Delete exisiting ToDoItem by id
 @itemToDeleteId = 8
 DELETE {{host}}:{{port}}/api/ToDoItems/{{itemToDeleteId}}
+
+###
+
+// Delete all ToDoItems
+DELETE {{host}}:{{port}}/api/ToDoItems/all

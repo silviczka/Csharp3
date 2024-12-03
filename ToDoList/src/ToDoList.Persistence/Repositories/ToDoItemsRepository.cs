@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using ToDoList.Domain.Models;
 
 namespace ToDoList.Persistence.Repositories;
 
-public class ToDoItemsRepository : IRepository<ToDoItem>
+public class ToDoItemsRepository : IRepositoryAsync<ToDoItem>
 {
     private readonly ToDoItemsContext context;
     public ToDoItemsRepository(ToDoItemsContext context)
@@ -14,47 +15,60 @@ public class ToDoItemsRepository : IRepository<ToDoItem>
         this.context = context;
     }
 
-    public void Create(ToDoItem item)
+    public async Task CreateAsync(ToDoItem item)
     {
-            context.ToDoItems.Add(item);
-            context.SaveChanges();
+        await context.ToDoItems.AddAsync(item);
+        await context.SaveChangesAsync();
     }
 
-    public IEnumerable<ToDoItem> Read()
+    public async Task <IEnumerable<ToDoItem>> ReadAllAsync()
     {
-        return context.ToDoItems.ToList();
+        return await context.ToDoItems.ToListAsync();
     }
 
-    public ToDoItem? ReadById(int id)
+    public async Task<ToDoItem?> ReadByIdAsync (int id)
     {
-        return context.ToDoItems.Find(id);
+        return await context.ToDoItems.FindAsync(id);
     }
 
-    public bool Update(ToDoItem item)
+    public async Task UpdateAsync(ToDoItem item)
     {
-        var existingItem = context.ToDoItems.Find(item.ToDoItemId);
+        var existingItem = await context.ToDoItems.FindAsync(item.ToDoItemId);
         //check if the item exists in the database
         if (existingItem == null)
         {
-            return false; //item not found, update failed
+            throw new InvalidOperationException("Item not found for update"); // Throw an exception if the item is not found
         }
         // Update properties if the item exists
         existingItem.Name = item.Name;
         existingItem.Description = item.Description;
         existingItem.IsCompleted = item.IsCompleted;
-        context.ToDoItems.Update(item);
-        context.SaveChanges();
-        return true; // update successful
+        existingItem.Category = item.Category;
+        await context.SaveChangesAsync();
     }
 
-    public bool Delete(int id)
+    public async Task DeleteAllAsync()
     {
-        var item = context.ToDoItems.Find(id);
-        if (item != null)
+        // Delete all items directly in the database without loading them
+        int deletedCount = await context.ToDoItems.ExecuteDeleteAsync();
+
+        // handle if no items were deleted
+        if (deletedCount == 0)
         {
-            context.ToDoItems.Remove(item);
-            context.SaveChanges();
+            Console.WriteLine("No items found for deletion.");
         }
-        return true;
     }
+
+    public async Task DeleteByIdAsync(int id)
+    {
+        var item = await context.ToDoItems.FindAsync(id);
+        if (item == null)
+        {
+            throw new InvalidOperationException("Item not found for deletion by ID");
+        }
+        context.ToDoItems.Remove(item);
+        await context.SaveChangesAsync();
+    }
+
+
 }
